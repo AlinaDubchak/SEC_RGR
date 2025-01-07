@@ -52,6 +52,10 @@ public class Server {
                         String premasterSecret = new String(premasterBytes);
                         System.out.println("[Server] Decrypted premaster secret: " + premasterSecret);
 
+                        // Генерація ключа сеансу
+                        byte[] sessionKey = KeyUtils.generateSessionKey(clientHello, serverHello, premasterSecret);
+                        System.out.println("[Server] Generated session key: " + Base64.getEncoder().encodeToString(sessionKey));
+
                         // Синхронізація з клієнтом
                         barrier.await();
 

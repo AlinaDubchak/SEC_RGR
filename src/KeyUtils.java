@@ -1,5 +1,6 @@
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class KeyUtils {
@@ -8,5 +9,12 @@ public class KeyUtils {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);
         return keyGen.generateKeyPair();
+    }
+
+    // Метод для генерації ключа сеансу
+    public static byte[] generateSessionKey(String clientRandom, String serverRandom, String premasterSecret) throws NoSuchAlgorithmException {
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        String combined = clientRandom + serverRandom + premasterSecret;
+        return sha256.digest(combined.getBytes());
     }
 }

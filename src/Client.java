@@ -52,6 +52,10 @@ public class Client {
                 out.writeUTF(encryptedPremasterBase64);
                 System.out.println("[Client] Sent encrypted premaster secret to server.");
 
+                // Генерація ключа сеансу
+                byte[] sessionKey = KeyUtils.generateSessionKey(clientHello, serverHello, premasterSecret);
+                System.out.println("[Client] Generated session key: " + Base64.getEncoder().encodeToString(sessionKey));
+
                 // Синхронізація з сервером
                 barrier.await();
 
