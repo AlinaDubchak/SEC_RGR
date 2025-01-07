@@ -10,9 +10,10 @@ public class TLSHandshakeSimulation {
         });
 
         Server server = new Server(port, barrier);
-        executor.submit(() -> server.start());
+        executor.submit(server::start);
 
         Client client = new Client("localhost", port, barrier);
-        executor.submit(() -> client.start());
+        executor.submit(client::start);
+
     }
 }
