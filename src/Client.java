@@ -37,9 +37,7 @@ public class Client {
                 System.out.println("[Client] Server public key: " + serverPublicKeyBase64);
 
                 // Відновлення публічного ключа сервера
-                byte[] serverPublicKeyBytes = Base64.getDecoder().decode(serverPublicKeyBase64);
-                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                PublicKey serverPublicKey = keyFactory.generatePublic(new X509EncodedKeySpec(serverPublicKeyBytes));
+                PublicKey serverPublicKey = readPublicKeyFromFile();
 
                 // Генерація та шифрування premaster секрету
                 String premasterSecret = "PremasterSecret: " + Math.random();
@@ -67,7 +65,7 @@ public class Client {
                 System.out.println("[Client] Decrypted 'ready' message from server: " + readyMessage);
 
                 // Відправка підтвердження готовності серверу
-                String readyMessageClient = "Ready from client";
+                String readyMessageClient = "Think only of the past as its remembrance gives you pleasure.";
                 cipher = Cipher.getInstance("AES");
                 cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(sessionKey, "AES"));
                 byte[] encryptedReadyMessageClient = cipher.doFinal(readyMessageClient.getBytes());
@@ -81,5 +79,25 @@ public class Client {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    // Зчитування публічного ключа з файлу
+    private PublicKey readPublicKeyFromFile() {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("server_public_key.txt"));
+            String line;
+            StringBuilder keyBuilder = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                if (!line.startsWith("--") && !line.endsWith("--")) {
+                    keyBuilder.append(line);
+                }
+            }
+            byte[] publicKeyBytes = Base64.getDecoder().decode(keyBuilder.toString());
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePublic(new X509EncodedKeySpec(publicKeyBytes));
+        } catch (IOException | GeneralSecurityException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
