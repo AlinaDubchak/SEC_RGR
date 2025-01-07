@@ -3,6 +3,7 @@ import java.net.*;
 import java.security.*;
 import java.util.Base64;
 import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import java.util.concurrent.CyclicBarrier;
 
 public class Server {
@@ -56,7 +57,15 @@ public class Server {
                         byte[] sessionKey = KeyUtils.generateSessionKey(clientHello, serverHello, premasterSecret);
                         System.out.println("[Server] Generated session key: " + Base64.getEncoder().encodeToString(sessionKey));
 
-                        // Синхронізація з клієнтом
+                        // Відправка повідомлення "готовий", зашифрованого сеансовим ключем
+                        String readyMessage = "Ready from server";
+                        cipher = Cipher.getInstance("AES");
+                        cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(sessionKey, "AES"));
+                        byte[] encryptedReadyMessage = cipher.doFinal(readyMessage.getBytes());
+                        out.writeUTF(Base64.getEncoder().encodeToString(encryptedReadyMessage));
+                        System.out.println("[Server] Sent encrypted 'ready' message to client.");
+
+                        // Очікування синхронізації з клієнтом
                         barrier.await();
 
                     } catch (Exception e) {

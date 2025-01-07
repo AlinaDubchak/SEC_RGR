@@ -4,6 +4,7 @@ import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import java.util.concurrent.*;
 
 public class Client {
@@ -55,6 +56,23 @@ public class Client {
                 // Генерація ключа сеансу
                 byte[] sessionKey = KeyUtils.generateSessionKey(clientHello, serverHello, premasterSecret);
                 System.out.println("[Client] Generated session key: " + Base64.getEncoder().encodeToString(sessionKey));
+
+                // Отримання зашифрованого повідомлення "готовий" від сервера
+                String encryptedReadyMessageBase64 = in.readUTF();
+                byte[] encryptedReadyMessage = Base64.getDecoder().decode(encryptedReadyMessageBase64);
+                cipher = Cipher.getInstance("AES");
+                cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(sessionKey, "AES"));
+                byte[] decryptedReadyMessage = cipher.doFinal(encryptedReadyMessage);
+                String readyMessage = new String(decryptedReadyMessage);
+                System.out.println("[Client] Decrypted 'ready' message from server: " + readyMessage);
+
+                // Відправка підтвердження готовності серверу
+                String readyMessageClient = "Ready from client";
+                cipher = Cipher.getInstance("AES");
+                cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(sessionKey, "AES"));
+                byte[] encryptedReadyMessageClient = cipher.doFinal(readyMessageClient.getBytes());
+                out.writeUTF(Base64.getEncoder().encodeToString(encryptedReadyMessageClient));
+                System.out.println("[Client] Sent encrypted 'ready' message to server.");
 
                 // Синхронізація з сервером
                 barrier.await();

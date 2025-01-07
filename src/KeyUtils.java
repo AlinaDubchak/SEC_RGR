@@ -1,7 +1,7 @@
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 public class KeyUtils {
     // Метод для генерації пари RSA ключів
@@ -11,7 +11,7 @@ public class KeyUtils {
         return keyGen.generateKeyPair();
     }
 
-    // Метод для генерації ключа сеансу
+    // Метод для генерації ключа сеансу (AES)
     public static byte[] generateSessionKey(String clientRandom, String serverRandom, String premasterSecret) throws NoSuchAlgorithmException {
         MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
         String combined = clientRandom + serverRandom + premasterSecret;
